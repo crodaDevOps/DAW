@@ -1,0 +1,9 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "provider": {
+    "openrouter": {
+      "env": ["OPENROUTER_API_KEY"]
+    }
+  },
+  "model": "anthropic/claude-sonnet-4-20250514"
+}
