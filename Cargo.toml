@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/audio-kernel"
+]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

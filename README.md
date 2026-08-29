@@ -1,9 +1,9 @@
-# D
+# DAW
 
+Browser-native digital audio workstation.
 
-
-
-
+API key managed via `.env` file (gitignored), referenced as
+`OPENROUTER_API_KEY` environment variable.
 
 PROJECT
 Browser-native digital audio workstation.
@@ -41,10 +41,9 @@ DESIGN RULES
 - Tests are required for behavioral changes.
 
 VALIDATION
-cargo fmt --check
-cargo clippy
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace
-cargo build --target wasm32-unknown-unknown
+cargo build --workspace --target wasm32-unknown-unknown
 npm test
 npm run build
-

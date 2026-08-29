@@ -20,10 +20,10 @@ Required environment variable:
 Kilo config is already set to use OpenRouter via `kilo.json` and reads the key from the environment.
 
 ## Local validation commands
-- cargo fmt --check
-- cargo clippy
+- cargo fmt --all -- --check
+- cargo clippy --workspace --all-targets --all-features -- -D warnings
 - cargo test --workspace
-- cargo build --target wasm32-unknown-unknown
+- cargo build --workspace --target wasm32-unknown-unknown
 - npm test
 - npm run build
 

@@ -1,0 +1,19 @@
+[package]
+name = "audio-kernel"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = [
+    "rlib",
+    "cdylib"
+]
+
+[features]
+default = []
+
+[dependencies]
+libm = "0.2"
+
+[dev-dependencies]
