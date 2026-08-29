@@ -16,6 +16,14 @@ Changes Applied:
   - crates/audio-kernel/src/kernel.rs: Changed phase field from f32 to f64 to eliminate floating-point accumulation drift over 24,000 samples; sample computation casts phase to f32 before libm::sinf — f64 accumulator yields sub-1e-10 phase error at transaction boundary
   - Cargo.toml: Added [profile.dev] and [profile.release] with panic = "abort" for wasm32 compatibility
 Phase 0 Definition of Done: ALL items pass — see section 1 acceptance matrix.
+Next Steps / Task List (Phase 1):
+  [ ] Add wasm-bindgen or explicit #[export_name] entry point(s) for WASM ABI exports
+  [ ] Implement AudioWorkletNode + AudioWorkletProcessor in TypeScript (bridge to audio_kernel.wasm)
+  [ ] Construct SharedArrayBuffer and wire it to ByteRingBuffer for host→kernel transaction channel
+  [ ] Build React/TypeScript control plane (sample rate config, play/stop, frequency/fret input)
+  [ ] Add end-to-end browser audio render test (WASM → AudioWorklet → SharedArrayBuffer → speakers)
+  [ ] Implement multi-voice support (RT-01 no-alloc voice pool)
+  [ ] Implement mixer (RT-01 no-alloc summing)
 
 ---
 
