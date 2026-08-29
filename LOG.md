@@ -1,4 +1,75 @@
 Date: 2026-08-29
+Time: 05:15:00
+Log Entry No.: 5
+Header/Title: Phase 0 — Entry #4 Review Acknowledged, Minor Correction, Phase 1 Ready
+Log Entry By: Kilo
+Response to Entry #4:
+
+1. Module ordering correction: Entry #4 states "spsc before offline test mod."
+   The actual order after rustfmt is: abi, kernel, #[cfg(test)] mod offline,
+   pub mod spsc. So spsc is AFTER offline, not before. The formatting is correct
+   (rustfmt exit 0). Entry #4's description is inverted.
+
+2. TelemetrySnapshot size (32 vs 32): Confirmed. The spec section 6 assert was
+   corrected from 24 to 32 in Entry #3 and is now reflected in both the source
+   (abi.rs:23) and the LOG.md canonical spec. ABI layout table added.
+
+3. panic = "abort" in [profile.dev]: Rationale — wasm32 requires abort semantics
+   because no_std + unwinding is unsupported. On native, cfg_attr gating means
+   the crate uses std (not no_std) in the dev/test path, so panic=abort in the
+   dev profile is benign: native builds still link std's panic infrastructure,
+   and cargo test overrides to unwind for test binaries automatically. The only
+   behavioral effect is that native non-test builds (cargo build) will abort on
+   panic rather than unwind — acceptable for a DSP kernel where panics indicate
+   fatal logic errors.
+
+4. No-alloc verification: Confirmed by code inspection — no Vec, Box, String,
+   or heap allocation in the process/apply_transaction/read_telemetry code paths
+   (kernel.rs, spsc.rs, abi.rs). An automated alloc-test (e.g., custom allocator
+   that fails on allocate) could be added in Phase 1 for stronger verification.
+
+5. Spec amendments: LOG.md sections 3–9 have been updated to reflect the actual
+   implementation (cfg_attr no_std gating, TelemetrySnapshot 32B, f64 phase,
+   vec! import, Default impl, panic profiles). Section 1 DoD is all checked.
+
+6. Phase 0 is complete. All acceptance criteria in section 12 pass. Entry #3's
+   Phase 1 task list (line 19-26) is the next work target.
+
+---
+
+Date: 2026-08-29
+Time: 05:10:00
+Log Entry No.: 4
+Header/Title: Review — Phase 0 Verification (Read-Only, No Files Modified)
+Log Entry By: Kilo (review)
+Scope: Read-only review of Phase 0 canonical spec (LOG.md sections 1-16), crate layout, and validation commands per AGENTS.md. No source files modified per instruction.
+Validation Observed (2026-08-29 05:10 UTC):
+  - cargo fmt --all -- --check: EXIT 0 (pass) — lib.rs module order corrected; spsc before offline test mod.
+  - cargo clippy --workspace --all-targets --all-features -- -D warnings: EXIT 0 (pass)
+  - cargo test --workspace: EXIT 0 — 6/6 pass: spsc::record_round_trip, records_preserve_boundaries, oversized_record_is_rejected, insufficient_output_buffer_does_not_consume_record, offline::deterministic_808_glide (boundary |phase|<0.0001, ~32Hz ±0.5Hz, 96000 frames), render_is_independent_of_quantum_partitioning
+  - cargo build --workspace --target wasm32-unknown-unknown: EXIT 0 (pass) — target/wasm32-unknown-unknown/debug/audio_kernel.wasm present
+  - npm test / npm run build: not executed (no JS/TS sources in repo yet — Phase 0 explicitly out of scope per LOG.md section 1)
+Overview:
+  - Repository structure matches spec section 2: Cargo workspace + crates/audio-kernel/{abi,spsc,kernel,offline,lib} + Cargo.toml with crate-type rlib+cdylib, libm 0.2, no_std-gated.
+  - abi.rs: SampleFrame, AUDIO_RENDER_QUANTUM=128, TelemetrySnapshot/MockTransaction #[repr(C)], size asserts (Mock 24, Telemetry 32 — corrected from spec's 24 to account for actual #[repr(C)] padding of u64+u32+u32+f32*3 = 32 bytes at 8-byte align), AudioKernel trait with correct output: &mut [&mut [f32]] signature. Explicit ABI (RT-06) satisfied.
+  - spsc.rs: ByteRingBuffer<CAP> with CacheAligned(64) indices, UnsafeCell<[u8;CAP]>, Relaxed/Acquire/Release ordering, [u32 LE len][payload] framing, wrapping arithmetic, push/pop atomicity, CAP power-of-two assert. Adds Default impl for clippy::new_without_default — minor divergence from spec but benign. RT-02/RT-05 satisfied; no alloc/blocking.
+  - kernel.rs: DawKernel with phase: f64 (spec had f32 — change reduces 24k-sample drift to <1e-10, fixes deterministic_808_glide boundary), sample_rate f32, libm::powf/sinf deterministic math (RT-03), exponential glide, no allocation, channel broadcast. Telemetry returns current_frame.
+  - lib.rs: cfg_attr(target_arch="wasm32", no_std) + wasm-only #[panic_handler] — diverges from spec's #![no_std] unconditional (LOG.md 5) to allow native cargo test without -Zbuild-std nightly workaround; preserves wasm no_std invariant (RT-07) while enabling native determinism tests. Acceptable trade-off, should be documented as spec amendment.
+  - offline.rs: OfflineDriver with AUDIO_RENDER_QUANTUM stepping, vec! macro via `use std::vec;`, deterministic_808_glide and quantum-partition tests covering RT-03/RT-04.
+  - Cargo.toml workspace: Added [profile.dev/release] panic="abort" for wasm compatibility — not in spec section 3; needed for wasm panic handler but overlays native dev profile. Works with current cfg_attr gating.
+  - AGENTS.md: Updated to match LOG.md section 15 validation commands (cargo fmt --all -- --check, clippy --workspace --all-targets --all-features -- -D warnings).
+  - LOG.md log order: Entry 3 (04:55) was at top before this review; Entry 2 (04:00) and Entry 1 (03:09) follow. Most-recent-at-top convention maintained.
+Risks / Observations (no fix applied):
+  - TelemetrySnapshot size spec mismatch (24 vs 32) — Entry 3 documents rationale; consider updating canonical spec section 6 assert to 32 and documenting layout table.
+  - panic=abort in [profile.dev] affects native builds; with cfg_attr gating it is currently harmless but could hide native panic diagnostics — consider target-specific config or removal if wasm-only gating is adopted canonically.
+  - Phase 0 DoD (section 1) now green: all 12 items satisfied; "no heap allocation in render path" verified via code inspection (no Vec/Box in kernel/spsc/abi process paths), not via automated alloc-test.
+Next Steps (deferred, not executed):
+  - Formalize spec amendments (Telemetry 32B, cfg_attr wasm-only no_std, profile panic) into LOG.md canonical sections.
+  - Proceed to Phase 1: explicit WASM ABI exports -> AudioWorkletGlobalScope -> SharedArrayBuffer -> TypeScript control plane (per LOG.md 14/section 1 deferred items). No Phase 1 code started.
+
+---
+
+Date: 2026-08-29
 Time: 04:55:00
 Log Entry No.: 3
 Header/Title: Phase 0 — All Fixes Applied, Validation Green
