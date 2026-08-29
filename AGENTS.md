@@ -1,3 +1,5 @@
+https://github.com/sickn33/antigravity-awesome-skills/tree/main/skills/systems-programming-rust-project
+
 
 Browser DAW — Phase 1 TDD Implementation Specification
 
