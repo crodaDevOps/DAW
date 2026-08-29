@@ -13,6 +13,8 @@ crate-type = [
 [features]
 default = []
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wee_alloc = "0.4"
 [dependencies]
 libm = "0.2"
 

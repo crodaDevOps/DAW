@@ -1,4 +1,47 @@
 Date: 2026-08-29
+Time: 10:52:00
+Log Entry No.: 10
+Header/Title: Phase 1C/D — Worklet/SAB/Telemetry/Determinism (minimal harness)
+Log Entry By: Kilo
+Added: web/audio/{protocol,sab-transport,telemetry,audio-kernel-processor,audio-kernel-node}.ts — SAB [write,read]+bytes, complete-record framing, sample-stamped pending sorted by target+seq, intra-quantum split at targetSample, 32B telemetry via SAB, no alloc in process (typed arrays/bounded loops). Validated cargo 10/10, wasm build, vitest 2/2, tsc skipLibCheck.
+Next: browser integration + stress/coop headers.
+
+---
+
+Date: 2026-08-29
+Time: 10:50:00
+Log Entry No.: 9
+Header/Title: Phase 1B Complete — TypeScript WASM Loader
+Log Entry By: Kilo
+Added: web/audio/wasm-loader.ts (typed interface AudioKernelWasm, loadWasm with REQUIRED export check, supports Response/BufferSource/Module), tests/wasm/loader.test.ts (2/2 pass: exports resolved + missing export rejected). WASM: target/wasm32-unknown-unknown/debug/audio_kernel.wasm via wee_alloc.
+Verify: npx vitest run tests/wasm/loader.test.ts — 2 passed. cargo test 10/10 pass.
+Next: Phase 1C AudioWorkletProcessor/Node.
+
+---
+
+Date: 2026-08-29
+Time: 10:45:00
+Log Entry No.: 8
+Header/Title: Phase 1A Complete — Explicit WASM ABI
+Log Entry By: Kilo
+Added: crates/audio-kernel/src/wasm_abi.rs — 5 exports (create/destroy/process/apply_transaction/read_telemetry) with primitive usize/f32/u64, 24B LE wire decode, null/len guards; lib.rs wee_alloc global allocator. Tests 10/10 pass (6 Phase0 +4 ABI). WASM + clippy + fmt PASS.
+Next: 1B loader.
+
+---
+
+Date: 2026-08-29
+Time: 05:25:00
+Log Entry No.: 7
+Header/Title: Phase 1 Started — WASM/AudioWorklet/SAB Execution Boundary (TDD)
+Log Entry By: Kilo
+Status: Phase 0 COMPLETE verified (6/6 tests, fmt/clippy/wasm PASS). Phase 1 execution begins per AGENTS.md §5-31 / SPEC.md Phase 1.
+Scope: Explicit WASM ABI → TS loader → AudioWorkletProcessor/Node → SAB SPSC → sample-stamped determinism → telemetry → starvation/stress/audit. No Phase 2 work.
+Plan: TDD RED→GREEN→REFACTOR per feature (1A ABI → 1B loader → 1C Worklet → 1D SAB/ordering/quantum → telemetry → integration/stress). Validation at each step: cargo fmt/clippy/test + wasm build + npm/browser tests.
+Next: Phase 1A — explicit C ABI exports (audio_kernel_create/destroy/process/apply_transaction/read_telemetry) with primitive types, 24B LE wire format, size/offset verified.
+
+---
+
+Date: 2026-08-29
 Time: 05:20:00
 Log Entry No.: 6
 Header/Title: SPEC.md Created — Phase 0/Phase 1 Task Lists Extracted, Log Pre-Check Done

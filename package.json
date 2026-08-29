@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "kilocode": "^1.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
