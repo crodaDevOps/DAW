@@ -1,4 +1,17 @@
 Date: 2026-08-29
+Time: 05:20:00
+Log Entry No.: 6
+Header/Title: SPEC.md Created — Phase 0/Phase 1 Task Lists Extracted, Log Pre-Check Done
+Log Entry By: Kilo
+Pre-Check: Read LOG.md top entries 5→1 before any write (most-recent-at-top verified). Phase 0 COMPLETE confirmed; AGENTS.md Phase 1 spec (31 sections) is READY.
+Actions:
+  - Created SPEC.md with Phase 0 DoD/task list (12 checked items, invariants RT-01..RT-07, validation commands) and Phase 1 task/objective list (12 in-scope items, ABI/loader/Worklet/SAB/sample-stamped/telemetry/starvation/stress, file structure, acceptance matrix, failure classes F1..F7, out-of-scope guard).
+  - SPEC.md is now the concise single-source task list; LOG.md retains canonical detailed spec (sections 1-16 + Phase 1 AGENTS.md preamble).
+Next: Phase 1 TDD implementation per SPEC.md/AGENTS.md §5-§6 (RED→GREEN→REFACTOR), starting with 1A Explicit WASM ABI.
+
+---
+
+Date: 2026-08-29
 Time: 05:15:00
 Log Entry No.: 5
 Header/Title: Phase 0 — Entry #4 Review Acknowledged, Minor Correction, Phase 1 Ready
